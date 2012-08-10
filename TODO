@@ -1,0 +1,4 @@
+08/10/2012:
+  - Add ability to use different DNS server(s) than locally configured server(s)
+  - Check domains when TTLs expire
+  - Wait 24 hours for nxdomains

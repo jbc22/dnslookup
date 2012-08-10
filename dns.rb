@@ -9,7 +9,7 @@ require "resolv"
 require "eventmachine"
 require "csv"
 require "optparse"
-@@filepath = "/home/jbc/domains.csv"
+
 options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: dnslookup.rb [options]"
