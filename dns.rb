@@ -16,8 +16,13 @@ OptionParser.new do |opts|
   opts.on("-v", "--verbose", "Turn on verbosity") do |v|
     options[:verbose] = v
   end
-  opts.on("-f", "--file", "Input csv file containing domains") do |f|
+  options[:file] = "domains.csv"
+  opts.on("-f", "--file FILE", "Input csv file containing domains, default domains.csv") do |f|
     options[:file] = f
+  end
+  options[:nameserver] = '8.8.8.8'
+  opts.on("-n","--nameserver nameserver", "DNS Server to use, default 8.8.8.8") do |n|
+    options[:nameserver] = n
   end
 end.parse!
 
@@ -33,19 +38,23 @@ class Dns
   end
 end
 
-start = Time.now
-EventMachine.run {
-  CSV.open(@@filepath, 'r', ',') do |row|
-      domain = row[0]
-      p "Requesting DNS info for #{domain}" if :verbose 
-      dns0 = Dns.new
-      dns0.callback {|response| p "For #{domain} #{response}" if :verbose}
-      dns0.errback {|response| p "For #{domain} #{response}" if :verbose}
-      Thread.new { dns0.resolve_hostname domain}
-   end
+loop do
+  start = Time.now
+  EventMachine.run {
+    CSV.open(options[:file], 'r', ',') do |row|
+        domain = row[0]
+        p "Requesting DNS info for #{domain}" if options[:verbose ]
+        dns0 = Dns.new
+        dns0.callback {|response| p "For #{domain} #{response}" if options[:verbose]}
+        dns0.errback {|response| p "For #{domain} #{response}" if options[:verbose]}
+        Thread.new { dns0.resolve_hostname domain}
+     end
 
-    EM.stop
-}
-finish = Time.now
+      EM.stop
+  }
+  finish = Time.now
 
-p "Time take for querying #{finish - start} seconds" if :verbose 
+  p "Time take for querying #{finish - start} seconds" if options[:verbose]
+
+  sleep(3600)
+end
